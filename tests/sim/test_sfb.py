@@ -21,7 +21,7 @@ R = np.diag([1]).astype(np.float32)
 
 
 def run():
-    xt.info("test sfb")
+    xt.info("test State Feedback Control")
 
     # build env
     env = gym.make(
@@ -34,6 +34,8 @@ def run():
     # controller
     K = compute_lqr_gain(env).T
     K = np.hstack([np.zeros_like(K), K]).astype(env.dtype)
+    xt.info("State Feedback Gain")
+    print(K.T)
 
     # logger
     log = xsim.Logger()
