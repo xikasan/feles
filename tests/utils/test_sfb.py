@@ -1,14 +1,12 @@
 # coding: utf-8
 
-import xair
 import gym
 import xsim
 import numpy as np
 import pandas as pd
 import xtools as xt
 import matplotlib.pyplot as plt
-from feles.utils import sfb
-
+from feles.controller import sfb
 
 DTYPE = np.float32
 DT = 0.01
