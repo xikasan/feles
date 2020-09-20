@@ -26,7 +26,7 @@ def run():
     # build env
     env = gym.make(
         "LVAircraftPitch-v1", dt=DT,
-        range_target=TARGET_RANGE,
+        target_range=TARGET_RANGE,
         target_period=TARGET_PERIOD
     )
     env.reset()
