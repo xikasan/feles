@@ -7,10 +7,12 @@ import xsim
 import numpy as np
 import pandas as pd
 import xtools as xt
+import tensorflow as tf
+import tensorflow.keras as tk
 import matplotlib.pyplot as plt
-from feles.controller import sfb
-from feles.controller.fel import FEL
 from tqdm import tqdm
+from feles.controller import sfb
+from feles.controller import se
 
 
 DTYPE = np.float32
@@ -26,12 +28,15 @@ ENV_FAIL_RANGE = [0.5, 0.51]
 # State Feedback Controller
 Q = np.diag([100, 1]).astype(DTYPE)
 R = np.diag([1]).astype(DTYPE)
-# FEL Controller
-LR = 3e-3
+
+# System Estimator
+LR = 3e-4
+UNITS = [8, 4]
+L2_SCALE = 1e-2
 
 
 def run():
-    xt.info("test Feedback Error Learning control")
+    xt.info("run System Estimation")
     xai.please()
 
     env = gym.make(
@@ -46,64 +51,54 @@ def run():
     max_act = env.action_space.high[env.IX_de]
     dim_act = 1  # xai.get_size(env.action_space)
     dim_obs = xai.get_size(env.observation_space)
+    dim_stt = dim_obs - 1
     dim_ref = env.get_target().shape[0]
 
     # controller
     # SFB
     K = sfb.compute_sfb_gain(env, Q, R).T
     K = np.hstack([np.zeros_like(K), K]).astype(DTYPE)
-    # FEL
-    fel = FEL(dim_act, max_act, lr=LR)
-    fel.reset(dim_ref)
-    xt.info("fel", fel)
+    # SE
+    sye = se.DeepSystemEstimator(UNITS, dim_stt, lr=LR, l2_scale=L2_SCALE)
+    sye.reset(dim_stt, dim_act)
+    xt.info("sye", sye)
 
     # logger
     log = xsim.Logger()
 
+    past_act = np.array([0.], dtype=DTYPE)
+    past_stt = env.state
+
     for time in tqdm(xsim.generate_step_time(DUE, DT)):
         xs = env.observation
-        act_sfb = compute_sfb_action(env, K)
-        act_fel = compute_fel_action(env, fel)
-        act = act_sfb + act_fel
-        loss = fel.update(env.get_target(), act[[env.IX_de]])
+        act = compute_sfb_action(env, K)
+        stt = env.state
+        ract = act[[env.IX_de]]
+        pre = sye.predict(stt, ract)
+        loss = sye.update(past_stt, past_act, stt)
 
         # simulation update
         if time == 30:
             env.set_fail()
         env.step(act)
-        log.store(
-            time=time,
-            xs=xt.r2d(xs),
-            us=xt.r2d(act),
-            sfb=xt.r2d(act_sfb),
-            fel=xt.r2d(act_fel),
-            loss=loss
-        ).flush()
+        past_act = ract
+        past_stt = stt
 
-    # result plot
+        log.store(time=time, xs=xt.r2d(xs), act=xt.r2d(act), pre=xt.r2d(pre), loss=loss).flush()
+
     res = xsim.Retriever(log)
     res = pd.DataFrame({
         "time": res.time(),
-        "reference": res.xs(idx=env.IX_C),
         "pitch": res.xs(idx=env.IX_T),
-        "elevator": res.us(idx=env.IX_de),
-        "sfb": res.sfb(idx=env.IX_de),
-        "fel": res.fel(idx=env.IX_de),
+        "reference": res.xs(idx=env.IX_C),
+        "predict": res.pre(idx=env.IX_T),
         "loss": res.loss()
     })
 
-    fig, axes = plt.subplots(nrows=3, sharex=True, figsize=(DUE/10, 10))
-    res.plot(x="time", y=["reference", "pitch"], ax=axes[0], xlim=[0, DUE])
-    res.plot(x="time", y=["elevator", "sfb", "fel"], ax=axes[1])
-    res.plot(x="time", y="loss", ax=axes[2])
+    fig, axes = plt.subplots(nrows=2, sharex=True, figsize=(DUE/10, 10))
+    res.plot(x="time", y=["reference", "pitch", "predict"], ax=axes[0], xlim=[0, DUE])
+    res.plot(x="time", y="loss", ax=axes[1])
     plt.show()
-
-
-def comput_action(env, K, fel):
-    act_sfb = compute_sfb_action(env, K)
-    act_fel = compute_fel_action(env, fel)
-    act = act_sfb + act_fel
-    return act, act_sfb, act_fel
 
 
 def compute_sfb_action(env, K):
@@ -113,13 +108,6 @@ def compute_sfb_action(env, K):
     e = r - x
     u = e.dot(K)
     return u
-
-
-def compute_fel_action(env, fel):
-    ref = env.get_target()
-    act = fel.get_action(ref)
-    act = np.hstack([[0], act]).astype(DTYPE)
-    return act
 
 
 if __name__ == '__main__':
