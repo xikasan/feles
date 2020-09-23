@@ -68,23 +68,25 @@ def run():
 
     past_act = np.array([0.], dtype=DTYPE)
     past_stt = env.state
+    pre = np.zeros_like(env.state)
 
     for time in tqdm(xsim.generate_step_time(DUE, DT)):
         xs = env.observation
-        act = compute_sfb_action(env, K)
         stt = env.state
-        ract = act[[env.IX_de]]
-        pre = sye.predict(stt, ract)
+        act = compute_sfb_action(env, K)
+        next_pre = predict_next_state(env, sye, stt, act)
         loss = sye.update(past_stt, past_act, stt)
+        # logging
+        log.store(time=time, xs=xt.r2d(xs), act=xt.r2d(act), pre=xt.r2d(pre), loss=loss).flush()
 
         # simulation update
         if time == 30:
             env.set_fail()
         env.step(act)
-        past_act = ract
+        pre = next_pre
+        past_act = act[[env.IX_de]]
         past_stt = stt
 
-        log.store(time=time, xs=xt.r2d(xs), act=xt.r2d(act), pre=xt.r2d(pre), loss=loss).flush()
 
     res = xsim.Retriever(log)
     res = pd.DataFrame({
@@ -108,6 +110,13 @@ def compute_sfb_action(env, K):
     e = r - x
     u = e.dot(K)
     return u
+
+
+def predict_next_state(env, sye, stt, act):
+    act = act[[env.IX_de]]
+    pre = sye.predict(stt, act)
+    return pre
+
 
 
 if __name__ == '__main__':

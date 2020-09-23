@@ -17,9 +17,9 @@ DTYPE = np.float32
 DT = 0.01
 DUE = 120
 
-ENV_NAME = "LVAircraftPitch-v3"
+ENV_NAME = "LVAircraftPitch-v4"
 ENV_TARGET_RANGE = xt.d2r([-1, 1])
-ENV_TARGET_PERIOD = 20
+ENV_TARGET_PERIOD = 10
 ENV_FAIL_MODE = "GAIN_REDUCTION"
 ENV_FAIL_RANGE = [0.5, 0.51]
 
@@ -39,8 +39,8 @@ def run():
         ENV_NAME, dt=DT,
         target_range=ENV_TARGET_RANGE,
         target_period=ENV_TARGET_PERIOD,
-        fail_mode=ENV_FAIL_MODE,
-        fail_range=ENV_FAIL_RANGE
+        # fail_mode=ENV_FAIL_MODE,
+        # fail_range=ENV_FAIL_RANGE
     )
     xt.info("env", env)
     env.reset()
@@ -69,8 +69,8 @@ def run():
         loss = fel.update(env.get_target(), act[[env.IX_de]])
 
         # simulation update
-        if time == 30:
-            env.set_fail()
+        # if time == 30:
+        #     env.set_fail()
         env.step(act)
         log.store(time=time, xs=xt.r2d(xs), us=xt.r2d(act), sfb=xt.r2d(act_sfb), fel=xt.r2d(act_fel), loss=loss).flush()
 
