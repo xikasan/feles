@@ -1,0 +1,25 @@
+env:
+  name: LVAircraftPitch-v4
+  due: 60
+  dt: 0.02
+  reference:
+    range: [-5, 5]
+    interval: 30
+    tau: 1.5
+    random: False
+
+controller:
+  fbc:
+    Q: [10, 1]
+    R: [1]
+
+  sye:
+    type: nonlinear
+    dim_state: 2
+    dim_action: 1
+    units: [8, 8]
+    lr:
+      ssl: 0.1
+      nlc: 0.05
+    window: 1
+    decay: 0.9

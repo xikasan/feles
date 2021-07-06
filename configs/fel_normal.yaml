@@ -1,0 +1,24 @@
+env:
+  name: LVAircraftPitch-v4
+  due: 120
+  dt: 0.02
+  reference:
+    range: [-5, 5]
+    interval: 5
+    tau: 0.5
+
+controller:
+  sfb:
+    Q: [10, 1]
+    R: [1]
+  fel:
+    dim_act: 1
+    dim_ref: 3
+    lr: 0.003
+    units: [8, 8]
+    repeat: 10
+
+result:
+  fig:
+    show: True
+    save: True

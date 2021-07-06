@@ -1,0 +1,34 @@
+mode: vs
+
+env:
+  name: LVAircraftPitch-v4
+  due: 60
+  dt: 0.02
+  reference:
+    range: [-5, 5]
+    interval: 5
+    tau: 1
+
+controller:
+  sfb:
+    Q: [10, 1]
+    R: [1]
+  fel:
+    type: simple
+    lr: 0.001
+    units: [8, 8]
+    l2_scale: 0.01
+    factor: 0.9
+  se:
+    lr: 0.5
+  feles:
+    online_sim:
+      num_repeat: 1
+      due_time: 10
+
+result:
+  fig:
+    show: True
+    pitch: True
+    elevator: False
+    loss: False

@@ -1,0 +1,38 @@
+env:
+  name: LVAircraftPitch-v4
+  due: 60
+  dt: 0.01
+  reference:
+    range: [-5, 5]
+    interval: 5
+    tau: 1
+  fail:
+#    mode: gain_reduction
+    mode: STABILITY_LOSS
+    value: [-1.2, -1.0]
+    time: 30
+
+controller:
+  sfb:
+    Q: [10, 1]
+    R: [1]
+  fel:
+    dim_act: 1
+    dim_ref: 3
+    lr: 0.5
+    units: [8, 8]
+    repeat: 1
+  sye:
+    lr: 0.5
+    units: [8, 8]
+    window: 1.0
+  nse:
+    lr:
+      ssl: 0.5
+      nlc: 0.1
+    units: [8, 8]
+    window: 1.0
+  feles:
+    temp: 5000.0
+    threashold: 0.01
+    decay: 0.9

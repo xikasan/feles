@@ -1,0 +1,11 @@
+env:
+  name: LVAircraftPitch-v4
+  due: 60
+  dt: 0.01
+  target:
+    range: [-5, 5]
+    period: 5
+controller:
+  sfb:
+    Q: [100, 1]
+    R: [1]

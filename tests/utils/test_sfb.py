@@ -1,7 +1,8 @@
 # coding: utf-8
 
-import gym
 import xsim
+import xair
+import gym
 import numpy as np
 import pandas as pd
 import xtools as xt
@@ -12,9 +13,9 @@ DTYPE = np.float32
 DT = 0.01
 DUE = 40
 
-ENV_NAME = "LVAircraftPitch-v1"
+ENV_NAME = "LVAircraftPitch-v4"
 ENV_TARGET_RANGE = xt.d2r([-5, 5])
-ENV_TARGET_PERIOD = 20
+ENV_TARGET_PERIOD = 5
 
 Q = np.diag([100, 1]).astype(DTYPE)
 R = np.diag([1]).astype(DTYPE)
@@ -62,9 +63,8 @@ def run():
 
 
 def compute_action(env, K):
-    obs = env.observation
-    x = obs[[env.IX_T, env.IX_q]]
-    r = np.array([obs[env.IX_C], 0.], dtype=env.dtype)
+    x = env.state
+    r = env.target[:2]
     e = r - x
     u = e.dot(K)
     return u

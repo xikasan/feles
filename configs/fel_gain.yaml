@@ -1,0 +1,28 @@
+env:
+  name: LVAircraftPitch-v4
+  due: 240
+  dt: 0.02
+  reference:
+    range: [-5, 5]
+    interval: 5
+    tau: 1
+  fail:
+    mode: gain_reduction
+    value: [0.1, 0.2]
+    time: 120
+
+controller:
+  sfb:
+    Q: [10, 1]
+    R: [1]
+  fel:
+    dim_act: 1
+    dim_ref:
+    lr: 0.5
+    units: [8, 8]
+    repeat: 1
+
+result:
+  fig:
+    show: True
+    save: True

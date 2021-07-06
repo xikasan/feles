@@ -1,0 +1,64 @@
+controller:
+  fbc:
+    Q:
+    - 10
+    - 1
+    R:
+    - 1
+  fel:
+    decay: 1.0
+    dim_action: 1
+    dim_reference: 3
+    lr: 0.01
+    lr_lin: 0.15
+    lr_nlc: 0.05
+    type: nlc
+    units:
+    - 16
+    - 16
+    window: 1.0
+  feles:
+    decay: 0.9
+    repeat: 3
+    simulation:
+      due: 1.0
+      interval: 0.02
+      num: 10
+    temp: 5000.0
+    threashold: 0.01
+    window: 0.5
+  sye:
+    decay: 0.9
+    dim_action: 1
+    dim_state: 2
+    lr: 0.5
+    lr_nlc: 0.05
+    lr_ssl: 0.1
+    type: nonlinear
+    units:
+    - 8
+    - 8
+    window: 1
+env:
+  dt: 0.02
+  due: 240
+  fail:
+    mode: gain_reduction
+    time: 120
+    value:
+    - -0.301
+    - -0.3
+  name: LVAircraftPitch-v4
+  reference:
+    interval: 20
+    random: false
+    range:
+    - -1
+    - 1
+    tau: 1.0
+result:
+  data: true
+  fig:
+    save: true
+    show: true
+  path: result/temp

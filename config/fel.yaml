@@ -1,0 +1,29 @@
+env:
+  name: LVAircraftPitch-v4
+  due: 240
+  dt: 0.02
+  reference:
+    range: [-1, 1]
+    interval: 50
+    tau: 1.
+    random: False
+  fail:
+    mode: gain_reduction
+    value: [0.3, 0.5]
+    time: 120
+
+controller:
+  fbc:
+    Q: [10, 1]
+    R: [1]
+
+  fel:
+    type: linear
+    dim_reference: 3
+    dim_action: 1
+    units: [16, 16]
+    lr: 0.01
+    lr_lin: 0.45
+    lr_nlc: 0.15
+    window: 1.0
+    decay: 1.0
